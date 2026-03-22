@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.ClickEvent;
@@ -60,8 +61,8 @@ public class AntiDropCommand {
                                             .append(item.getName().copy().formatted(Formatting.YELLOW))
                                             .append(" §centfernt§7. ")
                                             .append(Text.literal("§6§l↩")
-                                                    .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/antidrop add"))
-                                                            .withHoverEvent(new HoverEvent.ShowText(Text.literal("§7Klicke zum §6Wiederherstellen")))));
+                                                    .styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/antidrop add"))
+                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§7Klicke zum §6Wiederherstellen")))));
                                     context.getSource().sendFeedback(msg);
                                     playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
                                 } else {
@@ -94,8 +95,8 @@ public class AntiDropCommand {
                                     int index = i;
                                     Text itemText = Text.literal(" §8» ").append(stack.getName().copy().formatted(Formatting.YELLOW))
                                             .append(stack.getComponentChanges().isEmpty() ? " §8(§7Global§8)" : " §8(§bSpezifisch§8)")
-                                            .styled(s -> s.withHoverEvent(new HoverEvent.ShowItem(stack))
-                                                    .withClickEvent(new ClickEvent.RunCommand("/internal-antidrop-remove " + index)));
+                                            .styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(stack)))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/internal-antidrop-remove " + index)));
                                     context.getSource().sendFeedback(itemText);
                                 }
                                 playCenteredSound(SoundEvents.BLOCK_CHEST_OPEN, 0.5f, 1.2f);
@@ -116,8 +117,8 @@ public class AntiDropCommand {
                                                     .append(removedItem.getName().copy().formatted(Formatting.YELLOW))
                                                     .append(" §centfernt§7. ")
                                                     .append(Text.literal("§6§l↩")
-                                                            .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/antidrop add"))
-                                                                    .withHoverEvent(new HoverEvent.ShowText(Text.literal("§7Klicke zum §6Wiederherstellen")))));
+                                                            .styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/antidrop add"))
+                                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("§7Klicke zum §6Wiederherstellen")))));
                                             context.getSource().sendFeedback(msg);
                                             playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
                                         }
@@ -130,15 +131,16 @@ public class AntiDropCommand {
 
     private static void playCenteredSound(Object soundObj, float volume, float pitch) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            SoundEvent event;
-            if (soundObj instanceof SoundEvent) {
-                event = (SoundEvent) soundObj;
-            } else if (soundObj instanceof net.minecraft.registry.entry.RegistryEntry<?>) {
-                event = ((net.minecraft.registry.entry.RegistryEntry<SoundEvent>) soundObj).value();
-            } else {
-                return;
-            }
+        if (client.player == null) return;
+
+        SoundEvent event = null;
+        if (soundObj instanceof SoundEvent se) {
+            event = se;
+        } else if (soundObj instanceof RegistryEntry<?> re && re.value() instanceof SoundEvent se) {
+            event = se;
+        }
+
+        if (event != null) {
             client.player.playSound(event, volume, pitch);
         }
     }

@@ -76,7 +76,7 @@ public class Antidrop implements ClientModInitializer {
 
             for (JsonElement element : array) {
                 try {
-                    NbtCompound nbt = StringNbtReader.readCompound(element.getAsString());
+                    NbtCompound nbt = StringNbtReader.parse(element.getAsString());
                     ItemStack.CODEC.parse(lookup.getOps(NbtOps.INSTANCE), nbt)
                             .result()
                             .ifPresent(loadedItems::add);

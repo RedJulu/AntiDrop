@@ -27,7 +27,7 @@ public class DropMixin {
         if (client.player == null) return;
 
         ItemStack stack = client.player.getMainHandStack();
-        int currentSlot = client.player.getInventory().getSelectedSlot();
+        int currentSlot = client.player.getInventory().selectedSlot;
 
         if (Antidrop.getInstance().isProtected(stack)) {
             long currentTime = System.currentTimeMillis();
