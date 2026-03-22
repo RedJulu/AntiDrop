@@ -92,16 +92,32 @@ public class Antidrop implements ClientModInitializer {
 
     public boolean isProtected(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
+
         for (ItemStack protectedStack : ITEMS) {
-            if (stack.isOf(protectedStack.getItem())) {
-                if (protectedStack.getComponentChanges().isEmpty()) {
-                    return true;
-                }
-                if (ItemStack.areItemsAndComponentsEqual(protectedStack, stack)) {
-                    return true;
-                }
+
+            if (!stack.isOf(protectedStack.getItem())) continue;
+
+            if (protectedStack.getComponentChanges().isEmpty()) {
+                return true;
+            }
+
+            if (equalsIgnoreDamage(protectedStack, stack)) {
+                return true;
             }
         }
+
         return false;
+    }
+
+    public boolean equalsIgnoreDamage(ItemStack a, ItemStack b) {
+        if (!a.isOf(b.getItem())) return false;
+
+        ItemStack copyA = a.copy();
+        ItemStack copyB = b.copy();
+
+        copyA.setDamage(0);
+        copyB.setDamage(0);
+
+        return ItemStack.areItemsAndComponentsEqual(copyA, copyB);
     }
 }
