@@ -1,0 +1,50 @@
+/antidrop add
+/antidrop remove
+/antidrop
+/antidrop list
+/antidrop add
+/antidrop remove
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop remove
+/antidrop remove 0
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop list
+/antidrop remove
+/antidrop add
+/antidrop list
+/antidrop remove
+/antidrop list
+/antidrop add
+/antidrop clear
+/antidrop list
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop
+/antidrop list
+/antidrop add
+/antidrop list
+/internal-antidrop-remove
+/internal-antidrop-remove 1
+/internal-antidrop-remove 0
+/antidrop add
+/antidrop list
+/antidrop clear
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop list
+/tellraw Player149 {"text":"🔄"}
+/antidrop list
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop list
+/antidrop add
+/antidrop list
