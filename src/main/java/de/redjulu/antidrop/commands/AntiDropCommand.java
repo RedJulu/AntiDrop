@@ -57,10 +57,10 @@ public class AntiDropCommand {
                                 if (removed) {
                                     ad.save();
                                     Text msg = Text.literal("§8[§a✔§8] §7Schutz für ")
-                                            .append(item.getName().copy().formatted(Formatting.YELLOW))
+                                            .append(item.getName().copy().withColor(Formatting.YELLOW.getColorValue()))
                                             .append(" §centfernt§7. ")
                                             .append(Text.literal("§6§l↩")
-                                                    .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/antidrop add"))
+                                                    .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/internal-antidrop-restore " + item.hashCode()))
                                                             .withHoverEvent(new HoverEvent.ShowText(Text.literal("§7Klicke zum §6Wiederherstellen")))));
                                     context.getSource().sendFeedback(msg);
                                     playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
@@ -122,6 +122,28 @@ public class AntiDropCommand {
                                             playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
                                         }
                                         return Command.SINGLE_SUCCESS;
+                                    })
+                            )
+            );
+
+            dispatcher.register(
+                    ClientCommandManager.literal("internal-antidrop-restore")
+                            .then(ClientCommandManager.argument("hash", IntegerArgumentType.integer())
+                                    .executes(context -> {
+                                        int hash = IntegerArgumentType.getInteger(context, "hash");
+                                        Antidrop ad = Antidrop.getInstance();
+                                        for (ItemStack stack : ad.ITEMS) {
+                                            if (stack.hashCode() == hash) {
+                                                ad.ITEMS.add(stack.copy());
+                                                ad.save();
+                                                Text msg = Text.literal("§8[§6AntiDrop§8] §7Schutz für ")
+                                                        .append(stack.getName().copy().withColor(Formatting.YELLOW.getColorValue()))
+                                                        .append(" §awiederhergestellt§7.");
+                                                context.getSource().sendFeedback(msg);
+                                                break;
+                                            }
+                                        }
+                                        return 1;
                                     })
                             )
             );
