@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "antidrop",
+  "version": "${version}",
+  "name": "AntiDrop",
+  "description": "Schützt Items vor versehentlichem Droppen.",
+  "authors": ["RedJulu"],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/antidrop/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "de.redjulu.antidrop.Antidrop"
+    ]
+  },
+  "mixins": [
+    "antidrop.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": ">=1.21.11"
+  }
+}
