@@ -54,7 +54,7 @@ public class AntiDropCommand {
                                 if (client.player == null) return Command.SINGLE_SUCCESS;
                                 ItemStack item = client.player.getMainHandStack();
                                 Antidrop ad = Antidrop.getInstance();
-                                boolean removed = ad.ITEMS.removeIf(stack -> stack.getComponentChanges().isEmpty() ? item.isOf(stack.getItem()) : ItemStack.areItemsAndComponentsEqual(stack, item));
+                                boolean removed = ad.ITEMS.removeIf(stack -> stack.getComponentChanges().isEmpty() ? item.isOf(stack.getItem()) : ad.equalsIgnoreDamage(stack, item));
                                 if (removed) {
                                     ad.save();
                                     Text msg = Text.literal("§8[§a✔§8] §7Schutz für ")
