@@ -15,6 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class AntiDropCommand {
+    private static ItemStack lastRemovedItem = null;
+
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(
@@ -53,14 +55,23 @@ public class AntiDropCommand {
                                 if (client.player == null) return Command.SINGLE_SUCCESS;
                                 ItemStack item = client.player.getMainHandStack();
                                 Antidrop ad = Antidrop.getInstance();
-                                boolean removed = ad.ITEMS.removeIf(stack -> stack.getComponentChanges().isEmpty() ? item.isOf(stack.getItem()) : ad.equalsIgnoreDamage(stack, item));
-                                if (removed) {
+
+                                lastRemovedItem = null;
+                                for (ItemStack stack : ad.ITEMS) {
+                                    if (stack.getComponentChanges().isEmpty() ? item.isOf(stack.getItem()) : ad.equalsIgnoreDamage(stack, item)) {
+                                        lastRemovedItem = stack.copy();
+                                        break;
+                                    }
+                                }
+
+                                if (lastRemovedItem != null) {
+                                    ad.ITEMS.removeIf(stack -> stack.getComponentChanges().isEmpty() ? item.isOf(stack.getItem()) : ad.equalsIgnoreDamage(stack, item));
                                     ad.save();
                                     Text msg = Text.literal("§8[§a✔§8] §7Schutz für ")
                                             .append(item.getName().copy().withColor(Formatting.YELLOW.getColorValue()))
                                             .append(" §centfernt§7. ")
                                             .append(Text.literal("§6§l↩")
-                                                    .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/internal-antidrop-restore " + item.hashCode()))
+                                                    .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/internal-antidrop-restore " + lastRemovedItem.hashCode()))
                                                             .withHoverEvent(new HoverEvent.ShowText(Text.literal("§7Klicke zum §6Wiederherstellen")))));
                                     context.getSource().sendFeedback(msg);
                                     playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
@@ -110,13 +121,13 @@ public class AntiDropCommand {
                                         int index = IntegerArgumentType.getInteger(context, "index");
                                         Antidrop ad = Antidrop.getInstance();
                                         if (index >= 0 && index < ad.ITEMS.size()) {
-                                            ItemStack removedItem = ad.ITEMS.remove(index);
+                                            lastRemovedItem = ad.ITEMS.remove(index).copy();
                                             ad.save();
                                             Text msg = Text.literal("§8[§6AntiDrop§8] §7Schutz für ")
-                                                    .append(removedItem.getName().copy().formatted(Formatting.YELLOW))
+                                                    .append(lastRemovedItem.getName().copy().formatted(Formatting.YELLOW))
                                                     .append(" §centfernt§7. ")
                                                     .append(Text.literal("§6§l↩")
-                                                            .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/antidrop add"))
+                                                            .styled(s -> s.withClickEvent(new ClickEvent.RunCommand("/internal-antidrop-restore " + lastRemovedItem.hashCode()))
                                                                     .withHoverEvent(new HoverEvent.ShowText(Text.literal("§7Klicke zum §6Wiederherstellen")))));
                                             context.getSource().sendFeedback(msg);
                                             playCenteredSound(SoundEvents.BLOCK_NOTE_BLOCK_BASS, 0.5f, 1.5f);
@@ -131,19 +142,18 @@ public class AntiDropCommand {
                             .then(ClientCommandManager.argument("hash", IntegerArgumentType.integer())
                                     .executes(context -> {
                                         int hash = IntegerArgumentType.getInteger(context, "hash");
-                                        Antidrop ad = Antidrop.getInstance();
-                                        for (ItemStack stack : ad.ITEMS) {
-                                            if (stack.hashCode() == hash) {
-                                                ad.ITEMS.add(stack.copy());
-                                                ad.save();
-                                                Text msg = Text.literal("§8[§6AntiDrop§8] §7Schutz für ")
-                                                        .append(stack.getName().copy().withColor(Formatting.YELLOW.getColorValue()))
-                                                        .append(" §awiederhergestellt§7.");
-                                                context.getSource().sendFeedback(msg);
-                                                break;
-                                            }
+                                        if (lastRemovedItem != null && lastRemovedItem.hashCode() == hash) {
+                                            Antidrop ad = Antidrop.getInstance();
+                                            ad.ITEMS.add(lastRemovedItem.copy());
+                                            ad.save();
+                                            Text msg = Text.literal("§8[§6AntiDrop§8] §7Schutz für ")
+                                                    .append(lastRemovedItem.getName().copy().withColor(Formatting.YELLOW.getColorValue()))
+                                                    .append(" §awiederhergestellt§7.");
+                                            context.getSource().sendFeedback(msg);
+                                            playCenteredSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);
+                                            lastRemovedItem = null;
                                         }
-                                        return 1;
+                                        return Command.SINGLE_SUCCESS;
                                     })
                             )
             );
