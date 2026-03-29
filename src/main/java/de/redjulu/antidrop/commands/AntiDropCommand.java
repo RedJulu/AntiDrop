@@ -54,6 +54,11 @@ public class AntiDropCommand {
                                 MinecraftClient client = MinecraftClient.getInstance();
                                 if (client.player == null) return Command.SINGLE_SUCCESS;
                                 ItemStack item = client.player.getMainHandStack();
+                                if (item.isEmpty()) {
+                                    context.getSource().sendFeedback(Text.literal("§8[§c!§8] §7Du musst ein Item halten."));
+                                    playCenteredSound(SoundEvents.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+                                    return Command.SINGLE_SUCCESS;
+                                }
                                 Antidrop ad = Antidrop.getInstance();
 
                                 lastRemovedItem = null;
